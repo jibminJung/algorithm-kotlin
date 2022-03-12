@@ -11,11 +11,11 @@ var rx = 0
 var ry = 0
 var bx = 0
 var by = 0
-lateinit var arr: Array<CharArray>
 var record = Int.MAX_VALUE
+val visit = Array(11){Array(11){Array(11){BooleanArray(11)} } }
 fun main() = with(BufferedReader(InputStreamReader(System.`in`))) {
     val (n, m) = readLine().split(" ").map { it.toInt() }
-    arr = Array(n) { CharArray(m) }
+    val arr = Array(n) { CharArray(m) }
     for (i in 0 until n) {
         val input = readLine().toCharArray()
         for (j in 0 until m) {
@@ -31,123 +31,51 @@ fun main() = with(BufferedReader(InputStreamReader(System.`in`))) {
         }
     }
     val q= LinkedList<Node>()
-    q.offer(Node(arr,0))
+    q.offer(Node(copyArr(arr),1,rx, ry, bx, by))
+    visit[rx][ry][bx][by] = true
     while(!q.isEmpty()){
         val node = q.poll()
-        val arr = node.arr
-        val depth = node.depth
+        val (arr,depth,mrx,mry,mbx,mby) = node
+//        printArr(copyArr(arr))
         if(depth>10) continue
         for (k in 0..3){
-
+            val nArr = tilt(copyArr(arr),k,n,m)
+            if(rx!=0&&bx!=0&&!visit[rx][ry][bx][by]){
+                q.offer(Node(nArr,depth+1,rx,ry,bx,by))
+                visit[rx][ry][bx][by]=true
+            }else if(rx==0&&bx!=0){
+                record = Math.min(record,depth)
+                break;
+            }
+            rx = mrx; ry=mry;bx=mbx;by=mby;
         }
     }
-    backtracking(1, n, m)
-    println(record)
+    println(if(record==Int.MAX_VALUE)-1 else record)
 }
-class Node(
+data class Node(
     val arr:Array<CharArray>,
-    val depth: Int
+    val depth: Int,
+    val rx:Int,
+    val ry:Int,
+    val bx:Int,
+    val by:Int
 )
 
-fun backtracking(depth: Int, n: Int, m: Int) {
-    if (depth > 10) return
-
-    val restore = Array(n){CharArray(m)}
-    for (i in 0 until n){
-        restore[i] = arr[i].copyOf()
-    }
-    //상,우,하,좌로 기울여보기
-    for (k in 0..3) {
-        val mrx = rx
-        val mry = ry
-        val mbx = bx
-        val mby = by
-        tilt(k, n, m,arr)
-        println("k,depth = $k,$depth")
-        printArr(arr)
-        if (rx != 0 && bx != 0) {
-            backtracking(depth + 1, n, m)
-        } else if (rx == 0 && bx != 0) {
-            //success
-            println("success")
-            record = Math.min(record, depth)
-        }
+fun tilt(arr: Array<CharArray>,dir:Int,n:Int,m:Int) :Array<CharArray>{//기울이기 함수, 공이 빠졌는지에 대한 정보 리턴
+    if (dir == 0||dir==3) {
         for (i in 0 until n){
-            arr[i] = restore[i].copyOf()
-        }
-        rx=mrx
-        ry=mry
-        bx=mbx
-        by=mby
-    }
-}
-
-fun tilt(dir: Int, n: Int, m: Int,arr: Array<CharArray>) {//기울이기 함수, 공이 빠졌는지에 대한 정보 리턴
-    if (dir == 0) {
-        if (ry == by) {
-            var j = ry
-            for (i in 0 until n) {
-                move(i, j, dir,arr)
-            }
-        } else {
-            var j = ry
-            for (i in 0 until n) {
-                move(i, j, dir,arr)
-            }
-            j = by
-            for (i in 0 until n) {
-                move(i, j, dir,arr)
-            }
-        }
-    } else if (dir == 1) {
-        if (rx == bx) {
-            var i = rx
-            for (j in m-1 downTo 0) {
-                move(i, j, dir,arr)
-            }
-        } else {
-            var i = rx
-            for (j in m-1 downTo 0) {
-                move(i, j, dir,arr)
-            }
-            i = bx
-            for (j in m-1 downTo 0) {
-                move(i, j, dir,arr)
-            }
-        }
-    } else if (dir == 2) {
-        if (ry == by) {
-            var j = ry
-            for (i in n-1 downTo 0) {
-                move(i, j, dir,arr)
-            }
-        } else {
-            var j = ry
-            for (i in n-1 downTo 0) {
-                move(i, j, dir,arr)
-            }
-            j = by
-            for (i in n-1 downTo 0) {
-                move(i, j, dir,arr)
+            for (j in 0 until m){
+                move(i,j,dir,arr)
             }
         }
     } else {
-        if (rx == bx) {
-            var i = rx
-            for (j in 0 until m) {
-                move(i, j, dir,arr)
-            }
-        } else {
-            var i = rx
-            for (j in 0 until m) {
-                move(i, j, dir,arr)
-            }
-            i = bx
-            for (j in 0 until m) {
-                move(i, j, dir,arr)
+        for (i in n-1 downTo 0){
+            for (j in m-1 downTo 0){
+                move(i,j,dir,arr)
             }
         }
     }
+    return arr
 }
 
 fun move(i: Int, j: Int, dir: Int,arr:Array<CharArray>) {
@@ -182,8 +110,10 @@ fun move(i: Int, j: Int, dir: Int,arr:Array<CharArray>) {
     }
 }
 
-fun printArr(arr:Array<CharArray>){
-    for (i in 0..arr.size-1){
-        println(arr[i].joinToString(""))
+fun copyArr(arr:Array<CharArray>):Array<CharArray>{
+    val newArr = Array(arr.size){CharArray(arr.first().size)}
+    for (i in 0 until arr.size){
+        newArr[i] = arr[i].copyOf()
     }
+    return newArr
 }
