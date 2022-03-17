@@ -4,45 +4,71 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 
 fun main() = with(BufferedReader(InputStreamReader(System.`in`))) {
-    val (n,l) = readLine().split(" ").map { it.toInt() }
-    val arr = Array(n){IntArray(n)}
-    var answer = 0
-    for (i in 0 until n){
+    val (n, l) = readLine().split(" ").map { it.toInt() }
+    val arr = Array(n) { IntArray(n) }
+    for (i in 0 until n) {
         arr[i] = readLine().split(" ").map { it.toInt() }.toIntArray()
     }
-    for (i in 0 until n){
-        var cur = arr[i][0]
+    val narr = Array(n) { IntArray(n) }
+    for (i in 0 until n) {
+        for (j in 0 until n) {
+            narr[i][j] = arr[j][i]
+        }
+    }
+    println(solve(arr, n, l)+solve(narr, n, l))
+
+}
+
+fun solve(arr: Array<IntArray>, n: Int, l: Int): Int {
+    var countRoad = 0
+    for (i in 0 until n) {
+        var j = 0
         var flat = 1
-        for (j in 1 until n){
-            if(arr[i][j]==cur){
+        var flag = false
+        val ramp = BooleanArray(n)
+        while (j < n - 1) {
+            if (arr[i][j] == arr[i][j + 1]) {//same level frontward
                 flat++
-                cur = arr[i][j]
-            }else{
-                if(cur-arr[i][j] == -1){//오르막
-                    if(flat>=l){
-                        cur=arr[i][j]
-                    }else{
-                        flat = 1
-                    }
-                }else if(cur-arr[i][j]==1){//내리막
-                    var ff = 1
+                j++
+            } else {
+                if (arr[i][j + 1] - arr[i][j] == 1) {//오르막
                     val level = arr[i][j]
-                    for (x in 1 until l){
-                        if(x+j>=n)break
-                        if(level==arr[i][j+x]) {
-                            ff++
-                        }else{
-                            break
+                    var count = 0
+                    for (x in j downTo 0) {
+                        if (arr[i][x] == level && ramp[x].not()) count++
+                        else break
+                    }
+                    if (count >= l) {
+                        for (x in 0 until l) {
+                            ramp[j - x] = true
                         }
+                        j++
+                    } else {
+                        flag = true
+                        break;
                     }
-                    if(ff==l) {
-                        cur=arr[i][j]
+                } else if (arr[i][j + 1] - arr[i][j] == -1) {//내리막
+                    val level = arr[i][j + 1]
+                    var count = 0
+                    for (x in j + 1 until n) {
+                        if (arr[i][x] == level && ramp[x].not()) count++
+                        else break
                     }
-                }else{//높이 둘 이상
+                    if (count >= l) {
+                        for (x in 1..l) {
+                            ramp[j + x] = true
+                        }
+                        j++
+                    } else {
+                        flag = true
+                        break;
+                    }
+                } else {//높이 둘 이상
                     break
                 }
             }
+            if (j == n - 1) countRoad++
         }
-
     }
+    return countRoad
 }
