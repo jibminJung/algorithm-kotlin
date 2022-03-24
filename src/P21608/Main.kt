@@ -12,7 +12,7 @@ val list = ArrayList<Int>()
 fun main() = with(BufferedReader(InputStreamReader(System.`in`))) {
     n = readLine().toInt()
     arr = Array(n) { IntArray(n) }
-    like = Array(n + 1) { BooleanArray(n + 1) }
+    like = Array(n*n+1) { BooleanArray(n*n + 1) }
 
     for (i in 1..n * n) {
         val input = readLine().split(" ").map { it.toInt() }
@@ -22,8 +22,8 @@ fun main() = with(BufferedReader(InputStreamReader(System.`in`))) {
         list.add(input[0])
     }
     list.forEach {
-        var mostLike = 0
-        var mostEmpty = 0
+        var mostLike = -1
+        var mostEmpty = -1
         var x = 0
         var y = 0
         for (i in 0 until n) {
@@ -47,9 +47,28 @@ fun main() = with(BufferedReader(InputStreamReader(System.`in`))) {
         }
         arr[x][y] = it
     }
-    for (i in 0 until n){
-
+    arr.forEach {
+        println(it.joinToString(" "))
     }
+    var answer = 0
+    for (i in 0 until n){
+        for (j in 0 until n){
+            var likeCnt = 0
+            for (k in 0..3){
+                val nx = i + dx[k]
+                val ny = j + dy[k]
+                if (nx < 0 || ny < 0 || nx >= n || ny >= n) continue
+                if(like[arr[i][j]][arr[nx][ny]]) likeCnt++
+            }
+            when(likeCnt){
+                1->answer+=1
+                2->answer+=10
+                3->answer+=100
+                4->answer+=1000
+            }
+        }
+    }
+    println(answer)
 }
 
 fun check(i: Int, j: Int, number: Int): Pair<Int, Int> {
