@@ -4,28 +4,34 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 
 val sb = StringBuilder()
-var cnt = 0
+var count = 0
 fun main() = with(BufferedReader(InputStreamReader(System.`in`))) {
     repeat(readLine().toInt()) {
         val n = readLine().toInt()
         val arr = (mutableListOf(0) + readLine().split(" ").map { it.toInt() }).toIntArray()
-        val visit = IntArray(n + 1)
-        cnt = 0
-        for (i in visit.indices) {
-            if (visit[i] == 0) {
-                dfs(i,arr,visit)
+        val visit = BooleanArray(n + 1)
+        val chk = BooleanArray(n + 1)
+        count = 0
+        for (i in chk.indices) {
+            if (!chk[i]) {
+                dfs(arr[i], arr, visit, chk)
             }
         }
-        println(cnt)
-        println(visit.joinToString(" "))
+        sb.append(n-count+1).append("\n")
     }
+    println(sb)
 }
 
-fun dfs(target:Int,arr:IntArray,visit:IntArray){
-    visit[target]++
-    if(visit[target]==2) cnt++
-    if (visit[arr[target]]<2){
-        dfs(arr[target],arr,visit)
+fun dfs(now: Int, arr: IntArray, visit: BooleanArray, chk: BooleanArray): Pair<Int, Boolean> {
+    if (visit[now]) {
+        return Pair(now, true)
     }
-    visit[target]--
+    visit[now] = true
+
+    val temp = if(!chk[arr[now]]) dfs(arr[now], arr, visit, chk) else Pair(-1,false)
+    if (temp.second) count++
+    chk[now] = true
+    visit[now] = false
+    return Pair(temp.first, if (temp.first == now) !temp.second else temp.second)
+
 }
