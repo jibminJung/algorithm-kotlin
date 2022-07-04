@@ -5,6 +5,7 @@ import java.io.InputStreamReader
 
 lateinit var parentArr: IntArray
 lateinit var arr: Array<MutableList<Int>>
+val sb = StringBuilder()
 fun main() = with(BufferedReader(InputStreamReader(System.`in`))) {
     val n = readLine().toInt()
     arr = Array(n + 1) { mutableListOf<Int>() }
@@ -16,8 +17,9 @@ fun main() = with(BufferedReader(InputStreamReader(System.`in`))) {
     }
     dfs(1, 1)
     for (i in 2..n) {
-        println(parentArr[i])
+        sb.append(parentArr[i]).append("\n")
     }
+    println(sb)
 }
 
 fun dfs(parent: Int, node: Int) {
